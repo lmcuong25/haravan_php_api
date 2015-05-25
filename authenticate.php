@@ -1,19 +1,18 @@
 <?php
 require 'haravan.php';
-//pro  https://lublue.myharavan.com/admin/api/auth/?api_key=17920187d99a47bff0f5fe937d4c4383
-define("HARAVAN_API_KEY", "17920187d99a47bff0f5fe937d4c4383");
-define("HARAVAN_SECRET", "d83c00c9f95923d9e3de91bc0c010238");
-define("REDIRECT_URI", "http://haravanapi.com");
-define("HARAVAN_SCOPE", "read_products write_products");
+require 'config.php';
+
 session_start();
 
     if (isset($_GET['code'])) { // if the code param has been sent to this page... we are in Step 2
+    
+        //die("if the code param has been sent to this page... we are in Step 2");
+    
         // Step 2: do a form POST to get the access token
         $haravanClient = new HaravanClient($_GET['shop'], "", HARAVAN_API_KEY, HARAVAN_SECRET);
         session_unset();
 
         if(!$haravanClient->validateSignature($_GET)) die('Error: invalid signature.');
-
 
         // Now, request the token and store it in your session.
         $token =  $haravanClient->getAccessToken($_GET['code'], REDIRECT_URI);
@@ -22,12 +21,21 @@ session_start();
             $_SESSION['shop'] = $_GET['shop'];
 
         echo $token;
+		
+        if(IS_EMBED_APP){
+            //nếu app nhúng thì cài app xong chuyển trang qua link App
+    		//https://shopname.myharavan.com/admin/app#/embed/17920187d99a47bff0f5fe937d4c4383
+            header("Location: " . 'https://' . $_SESSION['shop'] . '/admin/app#/embed/' . HARAVAN_API_KEY);
+        }else{
+            header("Location: home.php"); 
+        }
 
-        header("Location: shop.php");
         exit;       
     }
     // if they posted the form with the shop name
     else if (isset($_POST['shop']) || isset($_GET['shop'])) {
+
+        //die("Step 1: get the shopname from the user and redirect the user to the haravan authorization page where they can choose to authorize this app");
 
         // Step 1: get the shopname from the user and redirect the user to the
         // haravan authorization page where they can choose to authorize this app
@@ -46,7 +54,7 @@ session_start();
     <p>Install this app in a shop to get access to its private admin data.</p> 
 
     <p style="padding-bottom: 1em;">
-        <span class="hint">Don&rsquo;t have a shop to install your app in handy? <a href="https://app.haravan.com/services/partners/api_clients/test_shops">Create a test shop.</a></span>
+        <span class="hint">Don&rsquo;t have a shop to install your app in handy? <a href="https://app.haravan.com/services/partners/">Create a test shop.</a></span>
     </p> 
 
     <form action="" method="post">
