@@ -24,10 +24,10 @@ class HaravanClient {
         $url .= "&response_type=code";
 		return $url;
 	}
-
+	
 	// Once the User has authorized the app, call this with the code to get the access token
 	public function getAccessToken($code, $redirect_url='') {
-		// POST to  POST https://SHOP_NAME.myharavan.com/admin/oauth/access_token
+		// POST to https://SHOP_NAME.myharavan.com/admin/oauth/access_token
 		$url = "https://{$this->shop_domain}/admin/oauth/access_token";
 		$payload = "client_id={$this->api_key}&client_secret={$this->secret}&code=$code";
         if ($redirect_url != '')
@@ -42,6 +42,11 @@ class HaravanClient {
 		return '';
 	}
 
+	public function setAccessToken($token)
+	{
+		$this->token = $token;
+	}
+	
 	public function callsMade()
 	{
 		return $this->shopApiCallLimitParam(0);
